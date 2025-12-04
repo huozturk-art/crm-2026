@@ -31,6 +31,12 @@ export async function analyzeImages(imageUrls: string[], prompt: string) {
                     };
                 }
 
+                // Security: Validate URL to prevent SSRF
+                if (!isValidUrl(url)) {
+                    console.warn(`Skipping invalid or unsafe URL: ${url}`);
+                    throw new Error(`Güvenlik nedeniyle bu URL işlenemedi: ${url}`);
+                }
+
                 const response = await fetch(url);
                 const buffer = await response.arrayBuffer();
                 return {
@@ -48,6 +54,27 @@ export async function analyzeImages(imageUrls: string[], prompt: string) {
     } catch (error) {
         console.error("Error analyzing images with Gemini:", error);
         throw new Error("Görüntü analizi sırasında bir hata oluştu.");
+    }
+}
+
+function isValidUrl(urlString: string): boolean {
+    try {
+        const url = new URL(urlString);
+
+        // 1. Protocol check
+        if (!['http:', 'https:'].includes(url.protocol)) {
+            return false;
+        }
+
+        // 2. Localhost check
+        const hostname = url.hostname.toLowerCase();
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
+            return false;
+        }
+
+        return true;
+    } catch (e) {
+        return false;
     }
 }
 
