@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Search, UserPlus, Edit2, Shield, ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
-import { createStaffUser } from '@/app/actions/staff';
+import { createStaffUser, updateStaffUser } from '@/app/actions/staff';
 
 interface Profile {
     id: string;
@@ -57,25 +57,26 @@ export default function StaffPage() {
         if (!editingProfile) return;
 
         try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    first_name: editingProfile.first_name,
-                    last_name: editingProfile.last_name,
-                    phone: editingProfile.phone,
-                    role: editingProfile.role,
-                    is_active: editingProfile.is_active
-                })
-                .eq('id', editingProfile.id);
+            const result = await updateStaffUser({
+                id: editingProfile.id,
+                first_name: editingProfile.first_name,
+                last_name: editingProfile.last_name,
+                phone: editingProfile.phone,
+                role: editingProfile.role,
+                is_active: editingProfile.is_active
+            });
 
-            if (error) throw error;
+            if (!result.success) {
+                throw new Error(result.error);
+            }
 
             setProfiles(profiles.map(p => p.id === editingProfile.id ? editingProfile : p));
             setIsEditModalOpen(false);
             setEditingProfile(null);
-        } catch (error) {
+            alert('Personel bilgileri güncellendi.');
+        } catch (error: any) {
             console.error('Error updating profile:', error);
-            alert('Güncelleme sırasında bir hata oluştu.');
+            alert('Güncelleme hatası: ' + error.message);
         }
     };
 
@@ -162,8 +163,8 @@ export default function StaffPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${profile.role === 'admin'
-                                                        ? 'bg-purple-100 text-purple-800'
-                                                        : 'bg-blue-100 text-blue-800'
+                                                    ? 'bg-purple-100 text-purple-800'
+                                                    : 'bg-blue-100 text-blue-800'
                                                     }`}>
                                                     {profile.role === 'admin' ? <Shield className="w-3 h-3 mr-1" /> : null}
                                                     {profile.role === 'admin' ? 'Yönetici' : 'Personel'}
@@ -171,8 +172,8 @@ export default function StaffPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${profile.is_active
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
                                                     }`}>
                                                     {profile.is_active ? <CheckCircle className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />}
                                                     {profile.is_active ? 'Aktif' : 'Pasif'}

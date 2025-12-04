@@ -68,3 +68,37 @@ export async function createStaffUser(formData: FormData) {
         return { success: false, error: error.message };
     }
 }
+
+export async function updateStaffUser(profile: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone: string | null;
+    role: 'admin' | 'staff';
+    is_active: boolean;
+}) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY eksik.' };
+    }
+
+    try {
+        const { error } = await supabaseAdmin
+            .from('profiles')
+            .update({
+                first_name: profile.first_name,
+                last_name: profile.last_name,
+                phone: profile.phone,
+                role: profile.role,
+                is_active: profile.is_active
+            })
+            .eq('id', profile.id);
+
+        if (error) throw error;
+
+        revalidatePath('/staff');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Update Staff Error:', error);
+        return { success: false, error: error.message };
+    }
+}
