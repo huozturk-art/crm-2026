@@ -4,12 +4,16 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { revalidatePath } from 'next/cache';
 
 export async function createStaffUser(formData: FormData) {
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
     const firstName = formData.get('first_name') as string;
     const lastName = formData.get('last_name') as string;
     const phone = formData.get('phone') as string;
     const role = formData.get('role') as string;
+
+    // Auto-generate email and password if not provided (for staff who don't login)
+    // Format: phone@crm.local (e.g. 905551234567@crm.local)
+    const cleanPhone = phone.replace(/\D/g, '');
+    const email = formData.get('email') as string || `${cleanPhone}@crm.local`;
+    const password = formData.get('password') as string || Math.random().toString(36).slice(-8) + 'Aa1!'; // Random strong password
 
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
         return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY eksik. Lütfen .env.local dosyasına ekleyin.' };
@@ -30,10 +34,7 @@ export async function createStaffUser(formData: FormData) {
         if (authError) throw authError;
         if (!authData.user) throw new Error('Kullanıcı oluşturulamadı.');
 
-        // 2. Update Profile (Trigger might have created it, but we want to be sure about role and phone)
-        // Wait a bit for trigger? Or just upsert.
-        // Since we have a trigger, the profile might already exist. Let's update it.
-
+        // 2. Update Profile
         const { error: profileError } = await supabaseAdmin
             .from('profiles')
             .update({
@@ -46,7 +47,6 @@ export async function createStaffUser(formData: FormData) {
             .eq('id', authData.user.id);
 
         if (profileError) {
-            // If update fails, maybe trigger hasn't run yet or failed. Let's try insert if not exists.
             const { error: insertError } = await supabaseAdmin
                 .from('profiles')
                 .upsert({

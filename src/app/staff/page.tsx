@@ -238,15 +238,7 @@ export default function StaffPage() {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-                                <Input name="email" type="email" required />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-                                <Input name="password" type="password" required minLength={6} />
-                            </div>
+                            {/* Email and Password removed - auto generated */}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Telefon (905...)</label>
