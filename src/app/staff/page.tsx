@@ -249,8 +249,8 @@ export default function StaffPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                                <Input name="phone" />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Telefon (905...)</label>
+                                <Input name="phone" required placeholder="905xxxxxxxxx" />
                             </div>
 
                             <div>

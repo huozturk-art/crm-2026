@@ -109,13 +109,21 @@ export async function deleteStaffUser(userId: string) {
     }
 
     try {
-        // 1. Delete from Auth (This might cascade to profiles if configured, but we handle errors)
+        // 1. Clean up related data to avoid Foreign Key constraints
+        // Unassign jobs
+        await supabaseAdmin.from('jobs').update({ assigned_to: null }).eq('assigned_to', userId);
+
+        // Delete reports created by user (or you could set created_by to null if allowed)
+        await supabaseAdmin.from('job_reports').delete().eq('created_by', userId);
+
+        // 2. Delete from Auth (This might cascade to profiles if configured)
         const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
         if (authError) {
-            // If auth delete fails, try deleting profile first (manual cascade)
-            console.log('Auth delete failed, trying manual profile delete first...');
-            await supabaseAdmin.from('profiles').delete().eq('id', userId);
+            console.log('Auth delete failed, trying manual profile delete first...', authError.message);
+            // If auth delete fails, try deleting profile first
+            const { error: profileError } = await supabaseAdmin.from('profiles').delete().eq('id', userId);
+            if (profileError) throw profileError;
 
             // Try auth delete again
             const { error: retryError } = await supabaseAdmin.auth.admin.deleteUser(userId);
