@@ -12,9 +12,13 @@ export async function GET(req: NextRequest) {
 
     const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
 
+    console.log('Verification Request:', { mode, token, challenge, expectedToken: verifyToken });
+
     if (mode === 'subscribe' && token === verifyToken) {
+        console.log('Verification Successful');
         return new NextResponse(challenge, { status: 200 });
     } else {
+        console.log('Verification Failed: Token mismatch or invalid mode');
         return new NextResponse('Forbidden', { status: 403 });
     }
 }
