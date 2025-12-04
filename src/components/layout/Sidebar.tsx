@@ -19,11 +19,12 @@ export function Sidebar() {
 
     return (
         <div className="flex flex-col h-screen w-64 bg-card border-r border-border text-card-foreground">
-            <div className="p-6 flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-lg">C</span>
-                </div>
-                <h1 className="text-xl font-bold tracking-tight">CRM 2026</h1>
+            <div className="p-6 flex items-center justify-center">
+                <img
+                    src="https://yildizenerji.com/wp-content/uploads/2022/02/yildiz-enerji.png"
+                    alt="Yıldız Enerji"
+                    className="h-12 w-auto object-contain"
+                />
             </div>
 
             <nav className="flex-1 px-3 space-y-1 mt-4">

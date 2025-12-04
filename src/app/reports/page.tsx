@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Search, Filter, FileText, Calendar, User, MapPin } from 'lucide-react';
+import { Search, Filter, FileText, Calendar, User, MapPin, Image as ImageIcon, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 interface JobReport {
     id: string;
@@ -13,6 +14,8 @@ interface JobReport {
     report_type: 'start' | 'end' | 'daily';
     description: string;
     created_at: string;
+    media_urls: string[] | null;
+    ai_analysis: string | null;
     jobs: {
         title: string;
     };
@@ -67,7 +70,10 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-bold text-gray-900">Raporlar</h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Saha Raporları</h1>
+                    <p className="text-sm text-gray-500">WhatsApp'tan gelen fotoğraflar ve AI analizleri</p>
+                </div>
                 <div className="flex items-center space-x-2">
                     <Button
                         variant={filterType === 'all' ? 'primary' : 'outline'}
@@ -93,61 +99,92 @@ export default function ReportsPage() {
                 </div>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <Input
-                            placeholder="Rapor, iş veya personel ara..."
-                            className="pl-10"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {loading ? (
-                            <div className="text-center py-8 text-gray-500">Raporlar yükleniyor...</div>
-                        ) : filteredReports.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">Rapor bulunamadı.</div>
-                        ) : (
-                            filteredReports.map((report) => (
-                                <div key={report.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                    <div className="flex flex-col sm:flex-row justify-between gap-4 mb-2">
-                                        <div className="flex items-center space-x-2">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${report.report_type === 'start'
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : 'bg-green-100 text-green-800'
-                                                }`}>
-                                                {report.report_type === 'start' ? 'İş Başlangıcı' : 'İş Bitişi'}
-                                            </span>
-                                            <span className="text-sm font-medium text-gray-900">
-                                                {report.jobs?.title || 'İsimsiz İş'}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center text-sm text-gray-500 space-x-4">
-                                            <div className="flex items-center">
-                                                <User className="w-3 h-3 mr-1" />
-                                                {report.profiles?.first_name} {report.profiles?.last_name}
-                                            </div>
-                                            <div className="flex items-center">
-                                                <Calendar className="w-3 h-3 mr-1" />
-                                                {new Date(report.created_at).toLocaleDateString('tr-TR', {
-                                                    day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
-                                                })}
-                                            </div>
-                                        </div>
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                    placeholder="Rapor, iş veya personel ara..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-64 bg-gray-100 rounded-lg animate-pulse"></div>
+                    ))}
+                </div>
+            ) : filteredReports.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                    <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">Henüz hiç rapor bulunamadı.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredReports.map((report) => (
+                        <Card key={report.id} className="overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                            {/* Image Section */}
+                            <div className="relative h-48 bg-gray-100">
+                                {report.media_urls && report.media_urls.length > 0 ? (
+                                    <img
+                                        src={report.media_urls[0]}
+                                        alt="Rapor Görseli"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-gray-400">
+                                        <ImageIcon className="w-10 h-10" />
                                     </div>
-                                    <p className="text-sm text-gray-600 mt-2 whitespace-pre-wrap">
+                                )}
+                                <div className="absolute top-2 right-2">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm ${report.report_type === 'start'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-green-500 text-white'
+                                        }`}>
+                                        {report.report_type === 'start' ? 'Başlangıç' : 'Bitiş'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <CardContent className="p-4 flex-1">
+                                <div className="mb-3">
+                                    <h3 className="font-semibold text-gray-900 line-clamp-1">
+                                        {report.jobs?.title || 'İsimsiz İş'}
+                                    </h3>
+                                    <div className="flex items-center text-xs text-gray-500 mt-1">
+                                        <User className="w-3 h-3 mr-1" />
+                                        {report.profiles?.first_name} {report.profiles?.last_name}
+                                        <span className="mx-2">•</span>
+                                        <Calendar className="w-3 h-3 mr-1" />
+                                        {new Date(report.created_at).toLocaleDateString('tr-TR', {
+                                            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {report.ai_analysis && (
+                                        <div className="bg-purple-50 p-3 rounded-md border border-purple-100">
+                                            <div className="flex items-center text-purple-700 text-xs font-bold mb-1">
+                                                <Sparkles className="w-3 h-3 mr-1" />
+                                                AI Analizi
+                                            </div>
+                                            <p className="text-xs text-purple-900 line-clamp-3">
+                                                {report.ai_analysis}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <p className="text-sm text-gray-600 line-clamp-3">
                                         {report.description}
                                     </p>
                                 </div>
-                            ))
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

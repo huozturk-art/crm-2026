@@ -43,11 +43,13 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: 221.2 83.2% 53.3%;
+  /* Yıldız Enerji Blue */
+  --primary: 210 80% 30%;
   --primary-foreground: 210 40% 98%;
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  /* Yıldız Enerji Amber/Orange */
+  --secondary: 35 90% 50%;
+  --secondary-foreground: 210 40% 98%;
 
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
@@ -60,7 +62,7 @@
 
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --ring: 210 80% 30%;
 
   --radius: 0.5rem;
 }
@@ -75,10 +77,12 @@
   --popover: 222.2 84% 4.9%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+  /* Darker Blue for Dark Mode */
+  --primary: 210 80% 40%;
+  --primary-foreground: 210 40% 98%;
 
-  --secondary: 217.2 32.6% 17.5%;
+  /* Darker Amber for Dark Mode */
+  --secondary: 35 90% 40%;
   --secondary-foreground: 210 40% 98%;
 
   --muted: 217.2 32.6% 17.5%;
@@ -92,7 +96,7 @@
 
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --ring: 210 80% 40%;
 }
 
 @layer base {
