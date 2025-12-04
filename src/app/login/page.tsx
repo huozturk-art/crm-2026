@@ -34,7 +34,8 @@ export default function LoginPage() {
                         data: {
                             first_name: 'Yeni',
                             last_name: 'Kullanıcı',
-                            role: 'admin', // İlk kullanıcıyı admin yapalım, sonra değiştirilebilir
+                            role: 'staff', // Güvenlik için varsayılan rol 'staff' olmalı
+                            is_active: false, // Admin onayı gereksin
                         },
                     },
                 });

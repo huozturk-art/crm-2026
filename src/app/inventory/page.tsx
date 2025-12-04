@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Plus, Search, AlertTriangle, Package, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import ExcelImportModal from '@/components/ExcelImportModal';
 
 export default function InventoryPage() {
@@ -31,6 +32,7 @@ export default function InventoryPage() {
             setItems(data || []);
         } catch (error) {
             console.error('Error fetching inventory:', error);
+            toast.error('Stok listesi yüklenirken hata oluştu.');
         } finally {
             setLoading(false);
         }

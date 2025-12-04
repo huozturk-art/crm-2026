@@ -6,6 +6,7 @@ import { Briefcase, CheckCircle, Clock, AlertTriangle, Activity } from 'lucide-r
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { getDashboardStats } from '@/app/actions/dashboard';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -20,6 +21,9 @@ export default function Dashboard() {
         setStats(result.stats);
         setRecentJobs(result.recentJobs || []);
         setPieData(result.pieChartData || []);
+      } else {
+        toast.error('Dashboard verileri yüklenemedi.');
+        console.error(result.error);
       }
       setLoading(false);
     };
