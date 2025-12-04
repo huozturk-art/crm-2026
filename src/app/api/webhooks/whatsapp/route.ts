@@ -3,6 +3,8 @@ import { sendWhatsAppMessage, getWhatsAppMediaUrl, downloadWhatsAppMedia } from 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { analyzeImage } from '@/lib/gemini';
 
+export const dynamic = 'force-dynamic';
+
 // Webhook verification (GET)
 export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;

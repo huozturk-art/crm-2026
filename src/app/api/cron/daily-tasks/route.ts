@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
 
+export const dynamic = 'force-dynamic';
+
 // This route should be called by a Cron Job scheduler (e.g., Vercel Cron, GitHub Actions, or external service)
 // Example Vercel Cron: "0 18 * * *" (Every day at 18:00)
 export async function GET(req: Request) {
