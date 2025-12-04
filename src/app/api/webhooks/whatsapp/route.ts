@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
+        console.log('Webhook received:', JSON.stringify(body));
 
         // Check if it's a WhatsApp status update or message
         const entry = body.entry?.[0];
@@ -31,11 +32,13 @@ export async function POST(req: NextRequest) {
         const message = value?.messages?.[0];
 
         if (!message) {
+            console.log('No message found in payload');
             return new NextResponse('OK', { status: 200 });
         }
 
         const from = message.from; // Sender phone number
         const messageType = message.type;
+        console.log(`Processing message from: ${from}, type: ${messageType}`);
 
         // 1. Find staff by phone number
         // Note: WhatsApp numbers usually come as '905551234567'. Ensure DB matches or normalize.
@@ -51,6 +54,8 @@ export async function POST(req: NextRequest) {
             // Optional: Send "You are not registered" message
             return new NextResponse('OK', { status: 200 });
         }
+
+        console.log(`Sender identified: ${profile.first_name} ${profile.last_name}`);
 
         if (messageType === 'image') {
             await handleImageMessage(message, profile, from);
