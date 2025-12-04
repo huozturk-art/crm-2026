@@ -102,3 +102,30 @@ export async function updateStaffUser(profile: {
         return { success: false, error: error.message };
     }
 }
+
+export async function deleteStaffUser(userId: string) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY eksik.' };
+    }
+
+    try {
+        // 1. Delete from Auth (This might cascade to profiles if configured, but we handle errors)
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+        if (authError) {
+            // If auth delete fails, try deleting profile first (manual cascade)
+            console.log('Auth delete failed, trying manual profile delete first...');
+            await supabaseAdmin.from('profiles').delete().eq('id', userId);
+
+            // Try auth delete again
+            const { error: retryError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+            if (retryError) throw retryError;
+        }
+
+        revalidatePath('/staff');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Delete Staff Error:', error);
+        return { success: false, error: error.message };
+    }
+}

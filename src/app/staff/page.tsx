@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Search, UserPlus, Edit2, Shield, ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
-import { createStaffUser, updateStaffUser } from '@/app/actions/staff';
+import { createStaffUser, updateStaffUser, deleteStaffUser } from '@/app/actions/staff';
 
 interface Profile {
     id: string;
@@ -189,6 +189,27 @@ export default function StaffPage() {
                                                     }}
                                                 >
                                                     <Edit2 className="w-4 h-4 text-gray-500 hover:text-primary" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={async () => {
+                                                        if (confirm('Bu personeli silmek istediğinize emin misiniz?')) {
+                                                            try {
+                                                                const result = await deleteStaffUser(profile.id);
+                                                                if (result.success) {
+                                                                    alert('Personel silindi.');
+                                                                    fetchProfiles();
+                                                                } else {
+                                                                    throw new Error(result.error);
+                                                                }
+                                                            } catch (error: any) {
+                                                                alert('Silme hatası: ' + error.message);
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <XCircle className="w-4 h-4 text-red-500 hover:text-red-700" />
                                                 </Button>
                                             </td>
                                         </tr>
