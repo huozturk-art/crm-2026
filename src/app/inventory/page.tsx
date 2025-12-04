@@ -1,18 +1,18 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { InventoryItem } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Plus, Search, AlertTriangle, Package } from 'lucide-react';
+import { Plus, Search, AlertTriangle, Package, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
+import ExcelImportModal from '@/components/ExcelImportModal';
 
 export default function InventoryPage() {
     const [items, setItems] = useState<InventoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     useEffect(() => {
         fetchItems();
@@ -43,12 +43,18 @@ export default function InventoryPage() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-bold text-gray-900">Stok & Malzeme</h1>
-                <Link href="/inventory/new">
-                    <Button>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Yeni Malzeme Ekle
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
+                        <FileSpreadsheet className="w-4 h-4 mr-2" />
+                        Excel ile Yükle
                     </Button>
-                </Link>
+                    <Link href="/inventory/new">
+                        <Button>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Yeni Malzeme Ekle
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <div className="relative">
@@ -122,6 +128,12 @@ export default function InventoryPage() {
                     </table>
                 </div>
             )}
+
+            <ExcelImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onSuccess={fetchItems}
+            />
         </div>
     );
 }
