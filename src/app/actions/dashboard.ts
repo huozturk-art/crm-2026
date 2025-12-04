@@ -2,45 +2,50 @@
 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+import { env } from '@/lib/env';
+
 export async function getDashboardStats() {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        return { success: false, error: 'SUPABASE_SERVICE_ROLE_KEY eksik.' };
-    }
+    // Env validation is handled in lib/env.ts, but we can double check if needed.
+    // Since we are using supabaseAdmin which uses env internally, we are good.
 
     try {
-        // 1. Job Stats
-        const { count: totalJobs } = await supabaseAdmin.from('jobs').select('*', { count: 'exact', head: true });
+        // Run all independent queries in parallel
+        const [
+            totalJobsResult,
+            completedJobsResult,
+            pendingJobsResult,
+            inventoryResult,
+            recentJobsResult,
+            allJobsResult
+        ] = await Promise.all([
+            // 1. Total Jobs
+            supabaseAdmin.from('jobs').select('*', { count: 'exact', head: true }),
 
-        const { count: completedJobs } = await supabaseAdmin
-            .from('jobs')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'completed');
+            // 2. Completed Jobs
+            supabaseAdmin.from('jobs').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
 
-        const { count: pendingJobs } = await supabaseAdmin
-            .from('jobs')
-            .select('*', { count: 'exact', head: true })
-            .in('status', ['pending', 'planned', 'in_progress']);
+            // 3. Pending/Active Jobs
+            supabaseAdmin.from('jobs').select('*', { count: 'exact', head: true }).in('status', ['pending', 'planned', 'in_progress']),
 
-        // 2. Inventory Stats (Critical Stock)
-        // We need to fetch items where current_stock <= critical_stock_level
-        // Supabase doesn't support field comparison in filter easily without RPC, so we fetch and filter or use a view.
-        // For small dataset, fetching all is fine. For large, use RPC.
-        // Let's try to use a simple query first.
-        const { data: inventory } = await supabaseAdmin
-            .from('inventory_items')
-            .select('current_stock, critical_stock_level');
+            // 4. Inventory (for Critical Stock)
+            supabaseAdmin.from('inventory_items').select('current_stock, critical_stock_level'),
 
+            // 5. Recent Activities
+            supabaseAdmin.from('jobs')
+                .select('id, title, status, created_at, profiles(first_name, last_name)')
+                .order('created_at', { ascending: false })
+                .limit(5),
+
+            // 6. Job Status Distribution (Pie Chart)
+            supabaseAdmin.from('jobs').select('status')
+        ]);
+
+        // Process Inventory
+        const inventory = inventoryResult.data;
         const criticalStockCount = inventory?.filter(item => item.current_stock <= item.critical_stock_level).length || 0;
 
-        // 3. Recent Activities (Last 5 Jobs)
-        const { data: recentJobs } = await supabaseAdmin
-            .from('jobs')
-            .select('id, title, status, created_at, profiles(first_name, last_name)')
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-        // 4. Job Status Distribution (for Pie Chart)
-        const { data: jobs } = await supabaseAdmin.from('jobs').select('status');
+        // Process Pie Chart Data
+        const jobs = allJobsResult.data;
         const statusDist = jobs?.reduce((acc: any, job) => {
             acc[job.status] = (acc[job.status] || 0) + 1;
             return acc;
@@ -57,12 +62,12 @@ export async function getDashboardStats() {
         return {
             success: true,
             stats: {
-                totalJobs: totalJobs || 0,
-                completedJobs: completedJobs || 0,
-                pendingJobs: pendingJobs || 0,
+                totalJobs: totalJobsResult.count || 0,
+                completedJobs: completedJobsResult.count || 0,
+                pendingJobs: pendingJobsResult.count || 0,
                 criticalStockCount
             },
-            recentJobs: recentJobs || [],
+            recentJobs: recentJobsResult.data || [],
             pieChartData
         };
 
