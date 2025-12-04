@@ -1,8 +1,10 @@
+import { env } from '@/lib/env';
+
 const WHATSAPP_API_URL = 'https://graph.facebook.com/v17.0';
 
 export async function sendWhatsAppMessage(to: string, text: string) {
-    const token = process.env.WHATSAPP_API_TOKEN;
-    const phoneId = process.env.WHATSAPP_PHONE_ID;
+    const token = env.WHATSAPP_API_TOKEN;
+    const phoneId = env.WHATSAPP_PHONE_ID;
 
     if (!token || !phoneId) {
         console.warn('WhatsApp credentials missing. Message not sent:', text);
@@ -36,7 +38,7 @@ export async function sendWhatsAppMessage(to: string, text: string) {
 }
 
 export async function getWhatsAppMediaUrl(mediaId: string): Promise<string | null> {
-    const token = process.env.WHATSAPP_API_TOKEN;
+    const token = env.WHATSAPP_API_TOKEN;
 
     if (!token) {
         console.error('WhatsApp token missing');
@@ -61,7 +63,7 @@ export async function getWhatsAppMediaUrl(mediaId: string): Promise<string | nul
 }
 
 export async function downloadWhatsAppMedia(url: string): Promise<ArrayBuffer | null> {
-    const token = process.env.WHATSAPP_API_TOKEN;
+    const token = env.WHATSAPP_API_TOKEN;
 
     if (!token) return null;
 

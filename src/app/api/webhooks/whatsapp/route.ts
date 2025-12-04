@@ -3,6 +3,8 @@ import { sendWhatsAppMessage, getWhatsAppMediaUrl, downloadWhatsAppMedia } from 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { analyzeImage } from '@/lib/gemini';
 
+import { env } from '@/lib/env';
+
 export const dynamic = 'force-dynamic';
 
 // Webhook verification (GET)
@@ -12,7 +14,7 @@ export async function GET(req: NextRequest) {
     const token = searchParams.get('hub.verify_token');
     const challenge = searchParams.get('hub.challenge');
 
-    const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
+    const verifyToken = env.WHATSAPP_VERIFY_TOKEN;
 
     console.log('Verification Request:', { mode, token, challenge, expectedToken: verifyToken });
 
@@ -100,7 +102,7 @@ async function handleImageMessage(message: any, profile: any, from: string) {
         return;
     }
 
-    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/crm-media/${fileName}`;
+    const publicUrl = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/crm-media/${fileName}`;
 
     // 3. Analyze with Gemini
     // Convert buffer to base64 for Gemini

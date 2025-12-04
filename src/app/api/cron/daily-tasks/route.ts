@@ -6,11 +6,15 @@ export const dynamic = 'force-dynamic';
 
 // This route should be called by a Cron Job scheduler (e.g., Vercel Cron, GitHub Actions, or external service)
 // Example Vercel Cron: "0 18 * * *" (Every day at 18:00)
+import { env } from '@/lib/env';
+
+// ...
+
 export async function GET(req: Request) {
     // Basic security check (use a secret query param)
     const { searchParams } = new URL(req.url);
     const secret = searchParams.get('secret');
-    if (secret !== process.env.CRON_SECRET) {
+    if (secret !== env.CRON_SECRET) {
         return new NextResponse('Unauthorized', { status: 401 });
     }
 
