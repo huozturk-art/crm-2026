@@ -25,9 +25,20 @@ const envSchema = z.object({
 });
 
 // Validate process.env
-// We use safeParse to avoid crashing immediately if we want to handle errors gracefully,
-// or parse to crash early.
-const _env = envSchema.safeParse(process.env);
+// We need to explicitly access process.env values so Next.js can inline them at build time.
+// Passing process.env directly to safeParse might not work on client-side as expected.
+const runtimeEnv = {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    WHATSAPP_API_TOKEN: process.env.WHATSAPP_API_TOKEN,
+    WHATSAPP_PHONE_ID: process.env.WHATSAPP_PHONE_ID,
+    WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN,
+    CRON_SECRET: process.env.CRON_SECRET,
+};
+
+const _env = envSchema.safeParse(runtimeEnv);
 
 if (!_env.success) {
     console.error('❌ Geçersiz ortam değişkenleri:', _env.error.format());
