@@ -18,8 +18,8 @@ export default function Dashboard() {
       const result = await getDashboardStats();
       if (result.success) {
         setStats(result.stats);
-        setRecentJobs(result.recentJobs);
-        setPieData(result.pieChartData);
+        setRecentJobs(result.recentJobs || []);
+        setPieData(result.pieChartData || []);
       }
       setLoading(false);
     };
@@ -136,8 +136,8 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${job.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          job.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
-                            'bg-amber-100 text-amber-800'
+                        job.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
+                          'bg-amber-100 text-amber-800'
                         }`}>
                         {job.status === 'completed' ? 'Tamamlandı' :
                           job.status === 'in_progress' ? 'Devam Ediyor' : 'Planlandı'}
